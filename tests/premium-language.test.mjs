@@ -5,7 +5,6 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 
 const index = read('index.html');
 const app = read('app-v2.js');
-const runtimeFixes = read('runtime-fixes.js');
 const i18n = read('i18n.js');
 const productDescriptionsEn = read('product-descriptions-en.js');
 const premiumVisuals = read('premium-visuals.css');
@@ -17,7 +16,7 @@ assert.match(index, /data-lang="bg"/);
 assert.match(index, /data-lang="en"/);
 assert.match(index, /i18n\.js/);
 assert.match(index, /premium-visuals\.css/);
-assert.match(index, /runtime-fixes\.js\?v=20261018-2/);
+assert.ok(!index.includes('runtime-fixes.js'), 'The redundant mutation observer layer must not load on the storefront.');
 
 assert.match(i18n, /SUPPORTED_LANGUAGES/);
 assert.match(i18n, /bg:/);
@@ -44,14 +43,6 @@ assert.match(app, /handleProductGridClick/);
 assert.match(app, /productGrid\?\.addEventListener/);
 assert.match(app, /addToCart\(id\)/);
 
-assert.match(runtimeFixes, /product-descriptions-en\.js\?v=20260830-1930/);
-assert.match(runtimeFixes, /syncEnglishCopy/);
-assert.match(runtimeFixes, /blurb\.textContent !== copy\.blurbEn/);
-assert.match(runtimeFixes, /description\.textContent !== copy\.longDescriptionEn/);
-assert.match(runtimeFixes, /bindReliableBuyButtons/);
-assert.match(runtimeFixes, /addToCart\(id\)/);
-assert.match(runtimeFixes, /stopImmediatePropagation/);
-assert.match(runtimeFixes, /wagner-language-changed/);
 
 assert.match(productDescriptionsEn, /export const PRODUCT_DESCRIPTIONS_EN/);
 assert.match(productDescriptionsEn, /prospray-320-hea/);
