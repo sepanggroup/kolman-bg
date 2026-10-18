@@ -1,0 +1,8 @@
+{
+  "name": "wagner-bg-www",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/source-integrity.test.mjs && node tests/catalog-quality.test.mjs && node tests/premium-language.test.mjs && node tests/payment-summary.test.mjs"
+  }
+}

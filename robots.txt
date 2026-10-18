@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kolman.wagner-bg.shop/sitemap.xml
