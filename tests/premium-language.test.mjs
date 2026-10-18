@@ -17,7 +17,7 @@ assert.match(index, /data-lang="bg"/);
 assert.match(index, /data-lang="en"/);
 assert.match(index, /i18n\.js/);
 assert.match(index, /premium-visuals\.css/);
-assert.match(index, /runtime-fixes\.js\?v=20260830-1930/);
+assert.match(index, /runtime-fixes\.js\?v=20261018-2/);
 
 assert.match(i18n, /SUPPORTED_LANGUAGES/);
 assert.match(i18n, /bg:/);
