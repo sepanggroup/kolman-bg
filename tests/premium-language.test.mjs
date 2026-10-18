@@ -61,7 +61,8 @@ assert.match(productDescriptionsEn, /'partner-p900':\s*\{[\s\S]*?longDescription
 assert.match(productDescriptionsEn, /'bright-dream-r19':\s*\{[\s\S]*?longDescriptionEn:\s*'Bright Dream Robotics R-19 is a concept/);
 
 assert.match(index, /app-v2\.js\?v=/);
-assert.match(index, /i18n\.js\?v=20260830-1930/);
+assert.ok(index.includes('i18n.js?v=20261018-1')); 
+assert.ok(app.includes("from './i18n.js?v=20261018-1'"));
 
 assert.match(premiumVisuals, /premium-product-card/);
 assert.match(premiumVisuals, /product-art/);
