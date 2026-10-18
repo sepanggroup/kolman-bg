@@ -46,6 +46,8 @@ assert.match(app, /addToCart\(id\)/);
 
 assert.match(runtimeFixes, /product-descriptions-en\.js\?v=20260830-1930/);
 assert.match(runtimeFixes, /syncEnglishCopy/);
+assert.match(runtimeFixes, /blurb\.textContent !== copy\.blurbEn/);
+assert.match(runtimeFixes, /description\.textContent !== copy\.longDescriptionEn/);
 assert.match(runtimeFixes, /bindReliableBuyButtons/);
 assert.match(runtimeFixes, /addToCart\(id\)/);
 assert.match(runtimeFixes, /stopImmediatePropagation/);
