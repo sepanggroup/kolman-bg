@@ -14,8 +14,8 @@ function syncEnglishCopy() {
     if (!copy) return;
     const blurb = card.querySelector('.product-body > p');
     const description = card.querySelector('.product-description');
-    if (blurb && copy.blurbEn) blurb.textContent = copy.blurbEn;
-    if (description && copy.longDescriptionEn) description.textContent = copy.longDescriptionEn;
+    if (blurb && copy.blurbEn && blurb.textContent !== copy.blurbEn) blurb.textContent = copy.blurbEn;
+    if (description && copy.longDescriptionEn && description.textContent !== copy.longDescriptionEn) description.textContent = copy.longDescriptionEn;
   });
 }
 
