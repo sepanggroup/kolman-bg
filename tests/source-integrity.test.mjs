@@ -18,7 +18,7 @@ const premium = read('premium-visuals.css');
 
 assert.match(index, /<html lang="bg">/);
 assert.match(index, /<link rel="canonical" href="https:\/\/kolman\.wagner-bg\.shop\/">/);
-assert.match(index, /premium-visuals\.css\?v=/);
+assert.match(index, /i18n\\.js\\?v=20261018-1/);\nassert.match(app, /i18n\\.js\\?v=20261018-1/);\nassert.match(index, /premium-visuals\.css\?v=/);
 assert.match(index, /cart\.css\?v=/);
 assert.match(index, /application\/ld\+json/);
 assert.match(index, /data-i18n="hero\.title">Техниката, която<\/span>/);
