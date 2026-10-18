@@ -8,7 +8,7 @@ import { CATALOG_ADDITIONS } from './catalog-additions.js';
 import { MERCHANT } from './merchant-config.js';
 import { loadCart, addToCart, setQuantity, removeFromCart, clearCart, cartCount, cartSubtotal, cartHasNonPurchasableItems, cartMailtoBody } from './cart.js';
 import { initCartPayment, renderPaymentSummary } from './payment.js?v=20260830-2335';
-import { applyLanguage, getLanguage, t } from './i18n.js';
+import { applyLanguage, getLanguage, t } from './i18n.js?v=20261018-1';
 import { PRODUCT_DESCRIPTIONS_EN } from './product-descriptions-en.js';
 
 const CATEGORIES = [...STORE.categories.filter((item) => item.id !== 'robots'), ROBOT_CATEGORY];
