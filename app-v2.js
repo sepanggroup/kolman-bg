@@ -69,7 +69,7 @@ function renderProducts() {
       <details class="product-details"><summary>${escapeHtml(t('product.full'))}</summary><div class="product-description">${escapeHtml(detailedDescription(product))}</div></details>
       ${product.specs?.length ? `<div class="specs" aria-label="${escapeHtml(t('product.specs'))}">${product.specs.map((spec) => `<span>${escapeHtml(spec)}</span>`).join('')}</div>` : ''}
       ${videoEmbed ? `<div class="product-video"><iframe src="${escapeHtml(videoEmbed)}" title="${escapeHtml(product.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>` : product.videoUrl ? `<a class="product-link" href="${escapeHtml(product.videoUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('product.video'))}</a>` : ''}
-      <div class="product-footer"><div class="price-block"><span class="price-label">${escapeHtml(t('product.price'))}</span><strong class="price-inquiry">${escapeHtml(formatPrice(product))}</strong></div><button class="btn btn-dark buy-product" type="button" data-product="${escapeHtml(product.id)}" ${purchasable ? '' : 'disabled'}>${purchasable ? `${escapeHtml(t('product.buy'))}${inCart ? ` · ${inCart}` : ''}` : escapeHtml(t('product.inquiry'))}</button></div>
+      <div class="product-footer"><div class="price-block"><span class="price-label">${escapeHtml(t('product.price'))}</span><strong class="price-inquiry">${escapeHtml(formatPrice(product))}</strong></div><button class="btn btn-dark buy-product" type="button" data-product="${escapeHtml(product.id)}" onclick="window.kolmanAddToCart(event, '${escapeHtml(product.id)}')" ${purchasable ? '' : 'disabled'}>${purchasable ? `${escapeHtml(t('product.buy'))}${inCart ? ` · ${inCart}` : ''}` : escapeHtml(t('product.inquiry'))}</button></div>
       ${product.priceNote ? `<div class="price-note">${escapeHtml(product.priceNote)}</div>` : ''}
       ${product.referenceUrl ? `<a class="product-link" href="${escapeHtml(product.referenceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('product.reference'))}</a>` : ''}
       ${product.officialUrl ? `<a class="product-link" href="${escapeHtml(product.officialUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('product.data'))}</a>` : ''}
@@ -114,24 +114,19 @@ function setupContact() {
     window.location.href = `mailto:${MERCHANT.email}?subject=${subject}&body=${body}`;
   });
 }
-// Capture product clicks before any legacy/runtime listener can swallow the event.
-document.addEventListener('click', (event) => {
-  const button = event.target.closest?.('#product-grid .buy-product');
-  if (!button || button.disabled) return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-
-  const id = button.dataset.product;
+// Explicit global entry point called directly by each generated product button.
+window.kolmanAddToCart = (event, id) => {
+  event?.preventDefault();
+  event?.stopPropagation();
   if (!id || !productById(id)) {
     console.error('[KOLMAN cart] Invalid product ID:', id);
     return;
   }
-
   addToCart(id);
-  openCart();
   updateCartUI();
   renderProducts();
-}, true);
+  openCart();
+};
 
 qs('#open-cart')?.addEventListener('click', openCart);
 qs('#hero-cart')?.addEventListener('click', openCart);
