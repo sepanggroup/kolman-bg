@@ -84,21 +84,91 @@ function renderProducts() {
 
 }
 function renderCart() {
-  const items = loadCart().map((entry) => ({ entry, product: productById(entry.id) })).filter(({ product }) => product);
-  cartCountEl.textContent = String(cartCount());
-  if (!items.length) { cartEmpty.hidden = false; cartItems.innerHTML = ''; }
-  else {
-    cartEmpty.hidden = true;
-    cartItems.innerHTML = items.map(({ entry, product }) => `<div class="cart-item"><div class="cart-item-image">${imageUrlFor(product) ? `<img src="${escapeHtml(imageSrc(product))}" alt="${escapeHtml(product.name)}" loading="lazy">` : ''}</div><div class="cart-item-main"><strong>${escapeHtml(product.name)}</strong><span>${escapeHtml(formatPrice(product))}</span><div class="cart-qty"><button type="button" data-minus="${escapeHtml(product.id)}" aria-label="−">−</button><span>${entry.quantity}</span><button type="button" data-plus="${escapeHtml(product.id)}" aria-label="+">+</button></div></div><button type="button" class="cart-remove" data-remove="${escapeHtml(product.id)}" aria-label="${escapeHtml(t('cart.close'))}">×</button></div>`).join('');
-    cartItems.querySelectorAll('[data-minus]').forEach((b) => b.addEventListener('click', () => { const i = loadCart().find((x) => x.id === b.dataset.minus); setQuantity(b.dataset.minus, (i?.quantity || 1) - 1); updateCartUI(); renderProducts(); }));
-    cartItems.querySelectorAll('[data-plus]').forEach((b) => b.addEventListener('click', () => { const i = loadCart().find((x) => x.id === b.dataset.plus); setQuantity(b.dataset.plus, (i?.quantity || 0) + 1); updateCartUI(); renderProducts(); }));
-    cartItems.querySelectorAll('[data-remove]').forEach((b) => b.addEventListener('click', () => { removeFromCart(b.dataset.remove); updateCartUI(); renderProducts(); }));
+  // Render every stored entry. Do not silently discard entries whose product
+  // lookup fails; show a diagnostic row so cart/catalog ID mismatches are visible.
+  const entries = loadCart();
+  if (cartCountEl) cartCountEl.textContent = String(entries.reduce((sum, entry) => sum + entry.quantity, 0));
+
+  if (cartItems) {
+    cartItems.replaceChildren();
+    for (const entry of entries) {
+      const product = productById(entry.id);
+      const row = document.createElement('div');
+      row.className = 'cart-item';
+
+      const image = document.createElement('div');
+      image.className = 'cart-item-image';
+      if (product && imageUrlFor(product)) {
+        const img = document.createElement('img');
+        img.src = imageSrc(product);
+        img.alt = product.name;
+        img.loading = 'lazy';
+        image.appendChild(img);
+      }
+
+      const main = document.createElement('div');
+      main.className = 'cart-item-main';
+      const name = document.createElement('strong');
+      name.textContent = product ? product.name : (getLanguage() === 'bg' ? 'Продуктът вече не е в каталога' : 'Product no longer in catalog');
+      const price = document.createElement('span');
+      const payable = product && product.priceKnown && product.priceCurrency === 'EUR' && Number.isFinite(product.price);
+      price.textContent = payable ? formatPrice(product) : (getLanguage() === 'bg' ? 'Цена за потвърждение' : 'Price to be confirmed');
+      const quantity = document.createElement('div');
+      quantity.className = 'cart-qty';
+
+      const minus = document.createElement('button');
+      minus.type = 'button';
+      minus.dataset.minus = entry.id;
+      minus.setAttribute('aria-label', '−');
+      minus.textContent = '−';
+      minus.addEventListener('click', () => {
+        setQuantity(entry.id, entry.quantity - 1);
+        updateCartUI();
+        renderProducts();
+      });
+
+      const count = document.createElement('span');
+      count.textContent = String(entry.quantity);
+
+      const plus = document.createElement('button');
+      plus.type = 'button';
+      plus.dataset.plus = entry.id;
+      plus.setAttribute('aria-label', '+');
+      plus.textContent = '+';
+      plus.addEventListener('click', () => {
+        setQuantity(entry.id, entry.quantity + 1);
+        updateCartUI();
+        renderProducts();
+      });
+      quantity.append(minus, count, plus);
+      main.append(name, price, quantity);
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'cart-remove';
+      remove.dataset.remove = entry.id;
+      remove.setAttribute('aria-label', getLanguage() === 'bg' ? 'Премахни продукта' : 'Remove product');
+      remove.textContent = '×';
+      remove.addEventListener('click', () => {
+        removeFromCart(entry.id);
+        updateCartUI();
+        renderProducts();
+      });
+
+      row.append(image, main, remove);
+      cartItems.appendChild(row);
+    }
   }
+
+  const hasItems = entries.length > 0;
+  if (cartEmpty) cartEmpty.hidden = hasItems;
   const subtotal = cartSubtotal(productById);
-  cartSubtotalEl.textContent = `€${subtotal.toLocaleString(getLanguage() === 'bg' ? 'bg-BG' : 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (cartSubtotalEl) cartSubtotalEl.textContent = `€${subtotal.toLocaleString(getLanguage() === 'bg' ? 'bg-BG' : 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const hasQuotes = cartHasNonPurchasableItems(productById);
-  checkoutButton.disabled = !items.length || hasQuotes || subtotal <= 0;
-  cartNote.textContent = hasQuotes ? (getLanguage() === 'bg' ? 'Кошницата съдържа продукт с цена при запитване. Потвърждаваме офертата преди плащане.' : 'The cart contains a quote-based product. We confirm the offer before payment.') : (getLanguage() === 'bg' ? 'Платимите продукти са в EUR и са подготвени за PayPal checkout.' : 'Payable products are in EUR and ready for PayPal checkout.');
+  if (checkoutButton) checkoutButton.disabled = !hasItems || hasQuotes || subtotal <= 0;
+  if (cartNote) cartNote.textContent = hasQuotes
+    ? (getLanguage() === 'bg' ? 'Кошницата съдържа продукт с цена при запитване. Потвърждаваме офертата преди плащане.' : 'The cart contains a quote-based product. We confirm the offer before payment.')
+    : (getLanguage() === 'bg' ? 'Платимите продукти са в EUR и са подготвени за PayPal checkout.' : 'Payable products are in EUR and ready for PayPal checkout.');
 }
 function updateCartUI() { renderCart(); renderPaymentSummary(productById); initCartPayment(productById); }
 function setupMenu() {
