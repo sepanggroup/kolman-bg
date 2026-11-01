@@ -81,25 +81,7 @@ function renderProducts() {
     const holder = img.closest('.product-art'); if (holder) holder.innerHTML = '<div class="shape"><span>WAGNER</span></div>';
   }, { once: true }));
 
-  // Bind directly to each newly rendered button. This avoids delegated-click
-  // conflicts with legacy scripts and survives catalog re-renders.
-  productGrid.querySelectorAll('.buy-product').forEach((button) => {
-    button.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (button.disabled) return;
-      const id = button.dataset.product;
-      if (!id || !productById(id)) {
-        console.error('[KOLMAN cart] Invalid product ID:', id);
-        return;
-      }
-      addToCart(id);
-      openCart();
-      renderCart();
-      renderPaymentSummary(productById);
-      initCartPayment(productById);
-    });
-  });
+
 }
 function renderCart() {
   const items = loadCart().map((entry) => ({ entry, product: productById(entry.id) })).filter(({ product }) => product);
@@ -132,6 +114,25 @@ function setupContact() {
     window.location.href = `mailto:${MERCHANT.email}?subject=${subject}&body=${body}`;
   });
 }
+// Capture product clicks before any legacy/runtime listener can swallow the event.
+document.addEventListener('click', (event) => {
+  const button = event.target.closest?.('#product-grid .buy-product');
+  if (!button || button.disabled) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+
+  const id = button.dataset.product;
+  if (!id || !productById(id)) {
+    console.error('[KOLMAN cart] Invalid product ID:', id);
+    return;
+  }
+
+  addToCart(id);
+  openCart();
+  updateCartUI();
+  renderProducts();
+}, true);
+
 qs('#open-cart')?.addEventListener('click', openCart);
 qs('#hero-cart')?.addEventListener('click', openCart);
 qs('#close-cart')?.addEventListener('click', closeCart);
